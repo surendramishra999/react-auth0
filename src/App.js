@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Route} from 'react-router-dom';
+import {Route,Redirect} from 'react-router-dom';
 import Profile from './Profile';
 import Home from './Home';
 import Nav from './Nav';
@@ -15,7 +15,7 @@ class App extends Component {
   render() {
     return (
       <>
-        <Nav/>
+        <Nav auth={this.auth} {...this.props} />
           <div className="body">
           <Route path="/" 
           exact 
@@ -27,7 +27,11 @@ class App extends Component {
           />          
           <Route 
           path="/profile" 
-          component={Profile} 
+          render={(props)=>{
+            return(
+            this.auth.isAuthenticated()? (<Profile auth={this.auth} {...props}/>):(<Redirect to="/"/>)
+          )
+          }}
           />
           </div>
       </>

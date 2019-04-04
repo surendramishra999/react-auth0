@@ -1,4 +1,5 @@
 import auth0 from 'auth0-js';
+import Profile from './../Profile';
 
 
 export default class Auth{
@@ -43,6 +44,35 @@ export default class Auth{
   isAuthenticated(){
     const expireAt=JSON.parse(localStorage.getItem('expire_at'));
     return new Date().getTime()<expireAt;
+  }
+
+  logout=()=>{
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('id_token');
+    localStorage.removeItem('expire_at');
+    this.userProfile=null;
+    this.auth0.logout({
+      clientID:process.env.REACT_APP_AUTH0_CLIENT_ID,
+      returnTo:"http://localhost:3000/"
+    });
+    this.history.push('/');
+  }
+
+  getAccessToken=()=>{
+    const accessToken=localStorage.getItem("access_token");
+    if(!accessToken){
+     throw new Error("No Access Token found");
+    }
+    return accessToken;
+  }
+
+  getProfile=cb=>{
+   if(this.userProfile) return cb(this.userProfile);
+   this.auth0.client.userInfo(this.getAccessToken(),(error,userProfile)=>{
+     if(userProfile) this.userProfile=userProfile;
+     cb(userProfile,error);
+   });
+
   }
 
 }
