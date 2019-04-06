@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Route,Redirect} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import Profile from './Profile';
 import Home from './Home';
 import Nav from './Nav';
@@ -10,39 +10,43 @@ import Private from './Private';
 import Courses from './Courses';
 import Admin from './Admin';
 import PrivateRoute from './PrivateRoute';
+import AuthContext from './AuthContext';
 
 class App extends Component {
 
   constructor(props){
     super(props);
-    this.auth=new Auth(this.props.history);
+    this.state={
+    auth:new Auth(this.props.history)
+    };
   }
   render() {
+    const {auth} =this.state;
     return (
-      <>
-        <Nav auth={this.auth} {...this.props} />
+      <AuthContext.Provider value={auth}>
+        <Nav auth={auth} {...this.props} />
           <div className="body">
           <Route path="/" 
           exact 
-          render={(props)=>{return(<Home auth={this.auth} {...this.props} />)}}
+          render={(props)=>{return(<Home  {...this.props} />)}}
           />
           <Route path="/callback" 
           exact 
-          render={(props)=>{return(<Callback auth={this.auth} {...this.props} />)}}
+          render={(props)=>{return(<Callback auth={auth} {...this.props} />)}}
           />  
-          
+
           <Route  path="/public" component={Public} /> 
 
-          <PrivateRoute path="/private" auth={this.auth} component={Private} />
+          <PrivateRoute path="/private"  component={Private} />
 
-          <PrivateRoute path="/courses" auth={this.auth} scopes={['read:courses']} component={Courses}  />
+          <PrivateRoute path="/courses"  scopes={['read:courses']} component={Courses}  />
           
-          <PrivateRoute path="/profile" auth={this.auth} component={Profile} />
+          <PrivateRoute path="/profile"  component={Profile} />
 
-          <PrivateRoute path="/admin" auth={this.auth} component={Admin} roles={'admin'} />
+          <PrivateRoute path="/admin"  component={Admin} roles={'admin'} />
 
           </div>
-      </>
+      </AuthContext.Provider>
     );
   }
 }
