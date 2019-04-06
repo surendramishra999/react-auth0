@@ -1,6 +1,12 @@
 import auth0 from 'auth0-js';
 const REDIRACT_ON_LOGIN='redirect_on_login';
 const ROLE_URL="http://localhost:3000/roles";
+
+let _access_token=null;
+let _roles=null;
+let _expire_at=null;
+let _scopes=null;
+
 export default class Auth{
   constructor(history){
    this.history=history;
@@ -37,28 +43,21 @@ export default class Auth{
 
   setSession=authResult=>{
     //set expire time
-    const expireAt=JSON.stringify(
-      authResult.expiresIn * 1000 + new Date().getTime()
-      );
-      const scope=authResult.scope || this.requestedScope || '';
-      localStorage.setItem('access_token',authResult.accessToken);
-      localStorage.setItem('id_token',authResult.idToken);
-      localStorage.setItem('roles',JSON.stringify(authResult.idTokenPayload[ROLE_URL]));
-      localStorage.setItem('expire_at',expireAt);
-      localStorage.setItem('scopes',JSON.stringify(scope));
+    _expire_at=(authResult.expiresIn * 1000 + new Date().getTime());
+    _scopes=authResult.scope || this.requestedScope || '';
+    _access_token=authResult.accessToken;
+    _roles=authResult.idTokenPayload[ROLE_URL];
   }
 
   isAuthenticated(){
-    const expireAt=JSON.parse(localStorage.getItem('expire_at'));
-    return new Date().getTime()<expireAt;
+    return new Date().getTime()<_expire_at;
   }
 
   logout=()=>{
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('id_token');
-    localStorage.removeItem('expire_at');
-    localStorage.removeItem('scopes');
-    localStorage.removeItem('roles');
+    _access_token=null;
+    _expire_at=null;
+    _scopes=null;
+    _roles=null;
     localStorage.removeItem(REDIRACT_ON_LOGIN);
     this.userProfile=null;
     this.auth0.logout({
@@ -69,11 +68,10 @@ export default class Auth{
   }
 
   getAccessToken=()=>{
-    const accessToken=localStorage.getItem("access_token");
-    if(!accessToken){
+    if(!_access_token){
      throw new Error("No Access Token found");
     }
-    return accessToken;
+    return _access_token;
   }
 
   getProfile=cb=>{
@@ -87,14 +85,14 @@ export default class Auth{
 
   userHasScopes=(scopes)=>{
    const grantedScopes=(
-     JSON.parse(localStorage.getItem('scopes'))|| ""
+    _scopes|| ""
    ).split(" ");
    return scopes.every(scope=>grantedScopes.includes(scope));
   }
 
   checkRole=(role)=>{
     const roles=(
-      JSON.parse(localStorage.getItem('roles'))|| []
+      _roles|| []
     );
     return roles.includes(role);
    }
