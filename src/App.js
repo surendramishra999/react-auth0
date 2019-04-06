@@ -9,6 +9,7 @@ import Public from './Public';
 import Private from './Private';
 import Courses from './Courses';
 import Admin from './Admin';
+import PrivateRoute from './PrivateRoute';
 
 class App extends Component {
 
@@ -29,41 +30,17 @@ class App extends Component {
           exact 
           render={(props)=>{return(<Callback auth={this.auth} {...this.props} />)}}
           />  
+          
           <Route  path="/public" component={Public} /> 
-          <Route path="/private" 
-          exact 
-          render={(props)=>{return(
-          
-            this.auth.isAuthenticated()?<Private auth={this.auth} {...this.props} />:this.auth.login()
-          
-          )}}
-          /> 
-          <Route path="/courses" 
-          exact 
-          render={(props)=>{return(
-          
-            this.auth.isAuthenticated() && this.auth.userHasScopes(['read:courses'])?<Courses auth={this.auth} {...this.props} />:this.auth.login()
-          
-          )}}
-          />     
 
-          <Route path="/admin" 
-          exact 
-          render={(props)=>{return(
-          
-            this.auth.isAuthenticated() && this.auth.checkRole('admin')?<Admin auth={this.auth} {...this.props} />:this.auth.login()
-          
-          )}}
-          />    
+          <PrivateRoute path="/private" auth={this.auth} component={Private} />
 
-          <Route 
-          path="/profile" 
-          render={(props)=>{
-            return(
-            this.auth.isAuthenticated()? (<Profile auth={this.auth} {...props}/>):(<Redirect to="/"/>)
-          )
-          }}
-          />
+          <PrivateRoute path="/courses" auth={this.auth} scopes={['read:courses']} component={Courses}  />
+          
+          <PrivateRoute path="/profile" auth={this.auth} component={Profile} />
+
+          <PrivateRoute path="/admin" auth={this.auth} component={Admin} roles={'admin'} />
+
           </div>
       </>
     );

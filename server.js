@@ -38,7 +38,8 @@ function checkRole(role){
         if(Array.isArray(assignRoles) && assignRoles.includes(role)){
             return next();
         }else{
-            res.status[401].send("Insufficient Role");
+            res.status(401);
+            res.send("Insufficient Role");
         }
 
     }
