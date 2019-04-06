@@ -5,6 +5,8 @@ import Home from './Home';
 import Nav from './Nav';
 import Auth from './Auth/Auth';
 import Callback from './Callback';
+import Public from './Public';
+import Private from './Private';
 
 class App extends Component {
 
@@ -24,7 +26,16 @@ class App extends Component {
           <Route path="/callback" 
           exact 
           render={(props)=>{return(<Callback auth={this.auth} {...this.props} />)}}
-          />          
+          />  
+          <Route  path="/public" component={Public} /> 
+          <Route path="/private" 
+          exact 
+          render={(props)=>{return(
+          
+            this.auth.isAuthenticated()?<Private auth={this.auth} {...this.props} />:this.auth.login()
+          
+          )}}
+          />                 
           <Route 
           path="/profile" 
           render={(props)=>{
