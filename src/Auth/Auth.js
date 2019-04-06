@@ -47,6 +47,7 @@ export default class Auth{
     _scopes=authResult.scope || this.requestedScope || '';
     _access_token=authResult.accessToken;
     _roles=authResult.idTokenPayload[ROLE_URL];
+    this.scheduleTokenRenewal();
   }
 
   isAuthenticated(){
@@ -95,6 +96,26 @@ export default class Auth{
       _roles|| []
     );
     return roles.includes(role);
+   }
+
+   renewToken(cb){
+     this.auth0.checkSession({},(error,result)=>{
+       if(error){
+         console.log(`error: ${error.error} - ${error.errorDescription}`);
+       }else{
+         this.setSession(result);
+       }
+       if(cb) cb(error,result);
+     })
+
+   }
+   scheduleTokenRenewal(){
+     const delay=_expire_at-new Date().getTime();
+     if(delay>0){
+       setTimeout(()=>{
+         this.renewToken()
+       },delay);
+     }
    }
 
 }
