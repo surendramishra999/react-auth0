@@ -32,6 +32,25 @@ app.get('/private',jwtCheck,function(req,res){
     });
 });
 
+function checkRole(role){
+    return function (req,res,next){
+        const assignRoles=req.user['http://localhost:3000/roles'];
+        if(Array.isArray(assignRoles) && assignRoles.includes(role)){
+            return next();
+        }else{
+            res.status[401].send("Insufficient Role");
+        }
+
+    }
+}
+
+app.get('/admin',jwtCheck,checkRole('admin'),function(req,res){
+    res.json({
+        message:"Welcome Admin"
+    });
+});
+
+
 app.get('/course',jwtCheck,checkScope(["read:courses"]), function(req,res){
     res.json({
        courses:[

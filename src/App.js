@@ -8,6 +8,7 @@ import Callback from './Callback';
 import Public from './Public';
 import Private from './Private';
 import Courses from './Courses';
+import Admin from './Admin';
 
 class App extends Component {
 
@@ -44,7 +45,17 @@ class App extends Component {
             this.auth.isAuthenticated() && this.auth.userHasScopes(['read:courses'])?<Courses auth={this.auth} {...this.props} />:this.auth.login()
           
           )}}
-          />                           
+          />     
+
+          <Route path="/admin" 
+          exact 
+          render={(props)=>{return(
+          
+            this.auth.isAuthenticated() && this.auth.checkRole('admin')?<Admin auth={this.auth} {...this.props} />:this.auth.login()
+          
+          )}}
+          />    
+
           <Route 
           path="/profile" 
           render={(props)=>{

@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import React, { Component } from 'react'
 export default class componentName extends Component {
   render() {
-    const {isAuthenticated,login,logout,userHasScopes}=this.props.auth;
+    const {isAuthenticated,login,logout,userHasScopes,checkRole}=this.props.auth;
     return (
       <nav>
          <ul>
@@ -25,7 +25,12 @@ export default class componentName extends Component {
           <li>
             <Link to="/courses">Courses</Link>
           </li>  
-          }                       
+          } 
+          {isAuthenticated() && checkRole('admin') &&
+          <li>
+            <Link to="/admin">Admin</Link>
+          </li>  
+          }                                  
           <li>
             <button onClick={isAuthenticated() ? logout:login}>
                 {isAuthenticated() ? 'Log Out':'Log In'}

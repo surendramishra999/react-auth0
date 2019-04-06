@@ -1,5 +1,5 @@
 import auth0 from 'auth0-js';
-
+const ROLE_URL="http://localhost:3000/roles";
 export default class Auth{
   constructor(history){
    this.history=history;
@@ -37,9 +37,9 @@ export default class Auth{
       authResult.expiresIn * 1000 + new Date().getTime()
       );
       const scope=authResult.scope || this.requestedScope || '';
-
       localStorage.setItem('access_token',authResult.accessToken);
       localStorage.setItem('id_token',authResult.idToken);
+      localStorage.setItem('roles',JSON.stringify(authResult.idTokenPayload[ROLE_URL]));
       localStorage.setItem('expire_at',expireAt);
       localStorage.setItem('scopes',JSON.stringify(scope));
   }
@@ -54,6 +54,7 @@ export default class Auth{
     localStorage.removeItem('id_token');
     localStorage.removeItem('expire_at');
     localStorage.removeItem('scopes');
+    localStorage.removeItem('roles');
     this.userProfile=null;
     this.auth0.logout({
       clientID:process.env.REACT_APP_AUTH0_CLIENT_ID,
@@ -85,5 +86,12 @@ export default class Auth{
    ).split(" ");
    return scopes.every(scope=>grantedScopes.includes(scope));
   }
+
+  checkRole=(role)=>{
+    const roles=(
+      JSON.parse(localStorage.getItem('roles'))|| []
+    );
+    return roles.includes(role);
+   }
 
 }
