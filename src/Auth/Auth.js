@@ -1,4 +1,5 @@
 import auth0 from 'auth0-js';
+const REDIRACT_ON_LOGIN='redirect_on_login';
 const ROLE_URL="http://localhost:3000/roles";
 export default class Auth{
   constructor(history){
@@ -16,13 +17,16 @@ export default class Auth{
 
   login =()=>{
     this.auth0.authorize();
+    localStorage.setItem(REDIRACT_ON_LOGIN,JSON.stringify(this.history.location));
   }
 
   handleAuthentication=()=>{
     this.auth0.parseHash((err,authResult)=>{
       if(authResult && authResult.accessToken && authResult.idToken){
          this.setSession(authResult);
-         this.history.push('/');
+         const redirectUrl=(localStorage.getItem(REDIRACT_ON_LOGIN)==="undefined")
+         ?'/':JSON.parse(localStorage.getItem(REDIRACT_ON_LOGIN));
+         this.history.push(redirectUrl);
       }else if(err){
         this.history.push('/');
         alert(`Error :${err.error}. Check console log for more details`);
@@ -55,6 +59,7 @@ export default class Auth{
     localStorage.removeItem('expire_at');
     localStorage.removeItem('scopes');
     localStorage.removeItem('roles');
+    localStorage.removeItem(REDIRACT_ON_LOGIN);
     this.userProfile=null;
     this.auth0.logout({
       clientID:process.env.REACT_APP_AUTH0_CLIENT_ID,
